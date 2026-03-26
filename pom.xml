@@ -10,7 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>24</maven.compiler.release>
-        <exec.mainClass>pathz.RunTest</exec.mainClass>
+        <exec.mainClass>elPath.RunTest</exec.mainClass>
     </properties>
     <name>Paths Series (Tree)</name>
     <description>
@@ -25,7 +25,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>pathz.RunTest</mainClass>
+                            <mainClass>elPath.RunTest</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
