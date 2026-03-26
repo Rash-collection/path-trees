@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
 
-package pathz;
+package elPath;
 
 /**
  * <p>Main class for developing tests, or for user's testings.</p>
