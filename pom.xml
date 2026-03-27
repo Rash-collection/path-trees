@@ -16,6 +16,13 @@
     <description>
         Paths as in one-straight path from a tree, like a person's long name among the family tree.
     </description>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>path-trees</name>
+            <url>https://maven.pkg.github.com/Rash-collection/path-trees</url>
+        </repository>
+    </distributionManagement>
     <build>
         <plugins>
             <plugin>
