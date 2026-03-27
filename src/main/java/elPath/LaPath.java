@@ -70,5 +70,7 @@ public class LaPath {
         File,
         Folder
         ;
+        public boolean isFile(){return this == File;}
+        public boolean isFolder(){return this == Folder;}
     }
 }
