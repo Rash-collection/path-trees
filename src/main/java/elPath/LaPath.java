@@ -21,7 +21,7 @@ public class LaPath {
     }
     protected final boolean resolve(String path){
         if(path == null || path.isBlank())return false;
-        final var tp = this.validate(path);
+        final var tp = validate(path);
         if(tp == null)return false;
         this.type = tp;
         final var vals = path.trim().split(java.util.regex.Pattern.quote(SPL));
@@ -35,7 +35,7 @@ public class LaPath {
         }
         return true;
     }
-    protected final Type validate(String path){
+    protected final static Type validate(String path){
         if(path == null || path.isEmpty()) return null;
         final var hm = path.split(java.util.regex.Pattern.quote(SPL));
         final int lasty = hm.length - 1;
