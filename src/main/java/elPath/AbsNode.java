@@ -110,8 +110,8 @@ public class AbsNode<T extends AbsNode<T>> {
     public T self(){return (T)this;}
     protected final static class ChainRoot<T extends AbsNode<T>>{
         private ChainRoot(){}
-        public final Map<String, AbsNode<T>> root = new HashMap<>();
-        protected ChainRoot add(String name, AbsNode< T> value){
+        public final Map<String, T> root = new HashMap<>();
+        protected ChainRoot add(String name, T value){
             root.putIfAbsent(name, value);
             return this;
         }
