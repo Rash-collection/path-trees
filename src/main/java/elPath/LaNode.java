@@ -12,33 +12,56 @@ import java.util.Map;
 
 /**
  * <p>Simple nodes for general trees purposes.</p>
+ * <ol> Node's RULE
+ * <li>parent == NULL && file(no.extension) ==> root-folder (tree)</li>
+ * <li>parent != NULL && file(no.extension) ==> folder      (branch)</li>
+ * <li>parent != NULL && file   .extension  ==> file        (leaf)</li>
+ * <li>parent == NULL && file   .extension  ==> file-on-root(leaf)...not allowed</li>
+ * </ol>
  * @author rash4
  */
 public class LaNode<E, T extends LaNode<E, T>> {
-    public final static ChainRoot root = new ChainRoot();
+    public final static ChainRoot ROOT = new ChainRoot();
     private Map<String, T> children = new HashMap<>();
     private String name;
     private T parent;
     private NodeType type;
     private String absolutePath;
     private int level = 0;
-    public LaNode(String name){
-        this.name = name;
-        // make things automatic..
+    public LaNode(String name, T parent){
+        if(name == null || name.isEmpty())
+            throw new IllegalArgumentException(
+                    "name (NULL, empty or blank) are invalid values.");
+        this.name = name; // safely assigne the name value.
+        this.constructNode(parent);
+    }
+    final void constructNode(T parent){
+        // name must be instantiated already -_-
+        final boolean file = validate(this.name).isFile();
+        if(parent == null){
+            if(file)
+                throw new UnsupportedOperationException(
+                        "This edge case is not allowed (a leaf with (Trees) root nodes.)");
+            else{
+                this.type = NodeType.Tree;
+                ROOT.add(this.name, this.self());
+            }
+        }else parent.putIf(this.self(), false);
     }
     // the main put validator...!!
-    protected void putIf(T child, boolean overwrite){
-        if(this.adaptChild(child.name(), child, overwrite))
+    protected final void putIf(T child, boolean overwrite){
+        if(this.adaptChild(child, overwrite))
             this.children.put(child.name(), child);
     }
-    protected final boolean adaptChild(String name, T child, boolean overwrite){
-        if(name == null || name.isBlank() || child == null)return false;
+    protected final boolean adaptChild(T child, boolean overwrite){
+        if(this.name == null || this.name.isBlank() || child == null)return false;
         if(child.name().contains(":"+SPL))throw new IllegalArgumentException();
-        if(!overwrite && this.children.containsKey(name))return false;
+        if(!overwrite && this.children.containsKey(child.name()))return false;
         child.setStatsBasedOn(this.self());
         return true;
     }
     protected final void resetChildren(){
+        if(this.children.isEmpty())return;
         for(var child : this.children.values()){
             child.setStatsBasedOn(this.self());
             child.resetChildren();
@@ -52,9 +75,9 @@ public class LaNode<E, T extends LaNode<E, T>> {
         if(this.isFile()){ 
             this.type = NodeType.Leaf;
             this.children.clear(); // make sure it's empty for a leaf.
-        }
+        }else this.resetChildren(); // make sure even children follow-reset.
     }
-    protected boolean isFile(){return validate(this.absolutePath) == LaPath.Type.File;}
+    protected boolean isFile(){return validate(this.absolutePath).isFile();}
     public boolean isTree(){return this.type == NodeType.Tree;}
     public boolean isBranch(){return this.type == NodeType.Branch;}
     public boolean isLeaf(){return this.type == NodeType.Leaf;}
@@ -75,12 +98,13 @@ public class LaNode<E, T extends LaNode<E, T>> {
     }
     // total destruction, only the parent who called this method remain on it's parent's list.
     // this method should be called upon removing the target from the list...
+    // or maybe all is handled recursivly right!?
     public void dispose(){
         if(!this.isEmpty())for(var child : this.children.values()){
             child.dispose();
         }this.children.clear();
-        if(root.ROOT.containsKey(this.name)){
-            root.ROOT.remove(this.name);
+        if(ROOT.root.containsKey(this.name)){
+            ROOT.root.remove(this.name);
         }else if(this.connectedToParent())
             this.parent = null;
     }
@@ -88,19 +112,20 @@ public class LaNode<E, T extends LaNode<E, T>> {
     protected Map<String,T> children(){return this.children;}
     protected int plusLevel(){return this.level + 1;}
     public T self(){return (T)this;}
-    protected final static class ChainRoot{
+    protected final static class ChainRoot<T extends LaNode<?, T>>{
         private ChainRoot(){}
-        public final Map<String, LaNode<String,?>> ROOT = new HashMap<>();
-        protected ChainRoot add(String name, LaNode<String,?> value){
-            ROOT.putIfAbsent(name, value);
+        public final Map<String, LaNode<?,T>> root = new HashMap<>();
+        protected ChainRoot add(String name, LaNode<?, T> value){
+            root.putIfAbsent(name, value);
             return this;
         }
         protected ChainRoot remove(String name){
-            ROOT.remove(name);
+            root.remove(name);
             return this;
         }
+        @SuppressWarnings("unused")
         private void clear(){
-            ROOT.clear();
+            root.clear();
         }
     }
     public enum NodeType{
@@ -108,5 +133,8 @@ public class LaNode<E, T extends LaNode<E, T>> {
         Branch,
         Leaf,
         ;
+        public boolean isTree(){return this == Tree;}
+        public boolean isBranch(){return this == Branch;}
+        public boolean isLeaf(){return this == Leaf;}
     }
 }
